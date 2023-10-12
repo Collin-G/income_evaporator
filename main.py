@@ -19,7 +19,7 @@ def x_and_y_train(predict_length,data):
     x_train = []
     y_train = []
 
-    for i in range(predict_length, len(data)):
+    for i in range(60, len(data)):
         x_train.append(data[i-predict_length:i,0])
         y_train.append(data[i,0])
 
@@ -65,7 +65,7 @@ def test_for_tomorrow(company, predict_length, model):
 def guess_prices(predict_length, model,data):
     x_test = []
     y_test = []
-    for x in range(predict_length, len(data)):
+    for x in range(60, len(data)):
         x_test.append(data[x-predict_length:x,0])
         y_test.append(data[x,0])
 
@@ -79,10 +79,8 @@ def guess_prices(predict_length, model,data):
 
 def determine_weights(p1,p2,p3, y_test):
     price_matrix = []
-    for i in range(len(y_test)):
-        batch = [p1[i], p2[i], p3[i]]
-        price_matrix.append(batch)
-    
+    price_matrix = np.concatenate((np.array(p1), np.array(p2), np.array(p3)), axis=0)
+
     x_train, y_train = np.array(price_matrix), np.array(y_test)
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
     
@@ -108,8 +106,8 @@ med_predict = 30
 short_predict = 7
 
 model1 = build_model(long_predict, scaled_data)
-model2 = build_model(long_predict, scaled_data)
-model3 = build_model(long_predict, scaled_data)
+model2 = build_model(med_predict, scaled_data)
+model3 = build_model(short_predict, scaled_data)
 
 p1 = test_for_tomorrow(company, long_predict, model1)
 test_for_tomorrow(company, med_predict, model2)
