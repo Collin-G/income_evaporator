@@ -20,6 +20,7 @@ class Model():
         self.scaler, self.data = self.build_data()
         self.predict_length = predict_length
         self.model = self.build_model()
+        self.predicted_prices, self.labels = self.guess_prices()
 
     
     def build_data(self):
