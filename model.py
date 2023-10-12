@@ -10,33 +10,46 @@ from sklearn.preprocessing import MinMaxScaler
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM
+from tensorflow.keras.layers import Dense, LSTM, Dropout
 import yfinance as yfin
 
 class Model():
 
     def __init__(self, company, predict_length):
+        self.raw_data = None
         self.company = company
         self.scaler, self.data = self.build_data()
         self.predict_length = predict_length
         self.model = self.build_model()
         self.predicted_prices, self.labels = self.guess_prices()
         self.tmr_price = self.test_for_tomorrow()
+        
 
     
     def build_data(self):
         today = datetime.now()
 
         start = dt.datetime(2012,1,1)
-        end = today - timedelta(days=100)
+        end = today - timedelta(days=80)
         yfin.pdr_override()
         data = pdr.get_data_yahoo(self.company, start, end)
-
+        self.raw_data = data
         scaler = MinMaxScaler(feature_range=(0,1))
         scaled_data = scaler.fit_transform(data["Close"].values.reshape(-1,1))
         return scaler,scaled_data
     
     def x_and_y_train(self, predict_length,data):
+        
+        # def create_dataset(dataset, look_back):
+        # dataX, dataY = [], []
+        # for i in range(len(data)-60):
+        #     a = data[i:(i + predict_length), 0]
+        #     dataX.append(a)
+        #     dataY.append(data[i + predict_length, 0])
+        # x_train = np.array(dataX)
+        # x_train = np.reshape(x_train, (x_train.shape[0], predict_length, 1))
+        # return x_train, np.array(dataY)
+
         x_train = []
         y_train = []
 
@@ -53,8 +66,10 @@ class Model():
         x_train, y_train = self.x_and_y_train(self.predict_length, self.data)
         model = Sequential()
         model.add(LSTM(units=50, return_sequences = True, input_shape=(x_train.shape[1],1)))
+        model.add(Dropout(0.2))
         model.add(LSTM(units=50, return_sequences = False))
         model.add(Dense(units=25))
+        model.add(Dropout(0.2))
         model.add(Dense(units=1))
 
         model.compile(optimizer="adam", loss = "mean_squared_error")
