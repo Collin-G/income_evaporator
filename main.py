@@ -8,8 +8,8 @@ import datetime as dt
 from datetime import datetime, timedelta
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import VotingClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LinearRegression
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
@@ -37,7 +37,7 @@ def build_model(predict_length, data):
     model.add(Dense(units=1))
 
     model.compile(optimizer="adam", loss = "mean_squared_error")
-    model.fit(x_train, y_train, epochs=25, batch_size=32)
+    model.fit(x_train, y_train, epochs=1, batch_size=32)
 
     return model
 
@@ -79,12 +79,12 @@ def guess_prices(predict_length, model,data):
 
 def determine_weights(p1,p2,p3, y_test):
     price_matrix = []
-    price_matrix = np.concatenate((np.array(p1), np.array(p2), np.array(p3)), axis=0)
+    price_matrix = np.concatenate((np.array(p1), np.array(p2), np.array(p3)), axis=1)
 
     x_train, y_train = np.array(price_matrix), np.array(y_test)
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
+    # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
     
-    model = DecisionTreeClassifier()
+    model = LinearRegression()
     model.fit(x_train,y_train)
 
     return model
@@ -110,8 +110,8 @@ model2 = build_model(med_predict, scaled_data)
 model3 = build_model(short_predict, scaled_data)
 
 p1 = test_for_tomorrow(company, long_predict, model1)
-test_for_tomorrow(company, med_predict, model2)
-test_for_tomorrow(company, short_predict, model3)
+p2 = test_for_tomorrow(company, med_predict, model2)
+p3 = test_for_tomorrow(company, short_predict, model3)
 
 ps1, y = guess_prices(long_predict, model1, scaled_data)
 ps2, y = guess_prices(med_predict, model2, scaled_data)
@@ -119,4 +119,7 @@ ps3, y = guess_prices(short_predict , model3, scaled_data)
 
 stacked = determine_weights(ps1, ps2,ps3,y)
 
-stacked.predict([200,256,230])
+predicted_price = stacked.predict(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1))
+predicted_price.reshape(1,-1)
+predicted_price = scaler.inverse_transform(predicted_price)
+print(predicted_price)
