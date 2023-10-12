@@ -119,7 +119,7 @@ ps3, y = guess_prices(short_predict , model3, scaled_data)
 
 stacked = determine_weights(ps1, ps2,ps3,y)
 
-predicted_price = stacked.predict(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1))
-predicted_price.reshape(1,-1)
+predicted_price = stacked.predict(np.reshape(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1),3))
+predicted_price.reshape(-1,1)
 predicted_price = scaler.inverse_transform(predicted_price)
 print(predicted_price)
