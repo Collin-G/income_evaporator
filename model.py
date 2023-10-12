@@ -21,6 +21,7 @@ class Model():
         self.predict_length = predict_length
         self.model = self.build_model()
         self.predicted_prices, self.labels = self.guess_prices()
+        self.tmr_price = self.test_for_tomorrow()
 
     
     def build_data(self):
@@ -82,16 +83,16 @@ class Model():
         print(predicted_price)
         return predicted_price
 
-def guess_prices(self):
-    x_test = []
-    y_test = []
-    for x in range(60, len(self.data)):
-        x_test.append(self.data[x-self.predict_length:x,0])
-        y_test.append(self.data[x,0])
+    def guess_prices(self):
+        x_test = []
+        y_test = []
+        for x in range(60, len(self.data)):
+            x_test.append(self.data[x-self.predict_length:x,0])
+            y_test.append(self.data[x,0])
 
-    x_test = np.array(x_test)
-    x_test = np.reshape(x_test, (x_test.shape[0],x_test.shape[1],1))
+        x_test = np.array(x_test)
+        x_test = np.reshape(x_test, (x_test.shape[0],x_test.shape[1],1))
 
-    predicted_prices = self.model.predict(x_test)
-    predicted_prices = self.scaler.inverse_transform(predicted_prices)
-    return predicted_prices, y_test
+        predicted_prices = self.model.predict(x_test)
+        predicted_prices = self.scaler.inverse_transform(predicted_prices)
+        return predicted_prices, y_test

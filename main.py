@@ -29,3 +29,4 @@ model3 = Model(company, short_predict)
 
 
 stacked = StackerModel(model1, model2,model3)
+stacked.plot_results()
