@@ -12,7 +12,7 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.tree import DecisionTreeClassifier
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
+from tensorflow.keras.layers import Dense, LSTM
 import yfinance as yfin
 
 def x_and_y_train(predict_length,data):
@@ -108,8 +108,8 @@ med_predict = 30
 short_predict = 7
 
 model1 = build_model(long_predict, scaled_data)
-model2 = build_model(med_predict, scaled_data)
-model3 = build_model(short_predict, scaled_data)
+model2 = build_model(long_predict, scaled_data)
+model3 = build_model(long_predict, scaled_data)
 
 p1 = test_for_tomorrow(company, long_predict, model1)
 test_for_tomorrow(company, med_predict, model2)
