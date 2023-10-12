@@ -41,7 +41,7 @@ def build_model(predict_length, data):
 
     return model
 
-def test_for_tomorrow(company, predict_length, model):
+def test_for_tomorrow(company, predict_length, model,scaler):
     today = datetime.now()
     start = dt.datetime(2012,1,1)
     yfin.pdr_override()
@@ -62,7 +62,7 @@ def test_for_tomorrow(company, predict_length, model):
     print(predicted_price)
     return predicted_price
 
-def guess_prices(predict_length, model,data):
+def guess_prices(predict_length, model,data,scaler):
     x_test = []
     y_test = []
     for x in range(60, len(data)):
