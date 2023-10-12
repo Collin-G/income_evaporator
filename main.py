@@ -77,9 +77,9 @@ def guess_prices(predict_length, model,data):
     return predicted_prices, y_test
 
 
-def determine_weights(p1,p2,p3, y_test):
+def determine_weights(ps1,ps2,ps3, y_test):
     price_matrix = []
-    price_matrix = np.concatenate((np.array(p1), np.array(p2), np.array(p3)), axis=1)
+    price_matrix = np.concatenate((np.array(ps1), np.array(ps2), np.array(ps3)), axis=1)
 
     x_train, y_train = np.array(price_matrix), np.array(y_test)
     # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
@@ -119,7 +119,7 @@ ps3, y = guess_prices(short_predict , model3, scaled_data)
 
 stacked = determine_weights(ps1, ps2,ps3,y)
 
-predicted_price = stacked.predict(np.reshape(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1),3))
-predicted_price.reshape(-1,1)
+predicted_price = stacked.predict(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1))
+predicted_price = predicted_price.reshape(-1,1)
 predicted_price = scaler.inverse_transform(predicted_price)
 print(predicted_price)
