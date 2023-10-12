@@ -39,16 +39,6 @@ class Model():
         return scaler,scaled_data
     
     def x_and_y_train(self, predict_length,data):
-        
-        # def create_dataset(dataset, look_back):
-        # dataX, dataY = [], []
-        # for i in range(len(data)-60):
-        #     a = data[i:(i + predict_length), 0]
-        #     dataX.append(a)
-        #     dataY.append(data[i + predict_length, 0])
-        # x_train = np.array(dataX)
-        # x_train = np.reshape(x_train, (x_train.shape[0], predict_length, 1))
-        # return x_train, np.array(dataY)
 
         x_train = []
         y_train = []
