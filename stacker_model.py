@@ -45,7 +45,7 @@ class StackerModel:
         plt.show()
 
     def get_accuracy(self): 
-        diffs = np.absolute((self.real_prices-  self.weighted_prices.flatten()/self.real_prices))
+        diffs = np.absolute((self.real_prices- self.weighted_prices.flatten())/self.real_prices)
         average_error = np.average(diffs) 
         print(average_error)
        
