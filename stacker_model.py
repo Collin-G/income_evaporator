@@ -17,6 +17,7 @@ class StackerModel:
         self.scaler = model1.scaler
         self.model = self.determine_weights()
         self.tmr_price = self.weighted_price(model1.tmr_price,model2.tmr_price,model3.tmr_price)
+        self.weighted_prices = self.weighted_price(self.prices1,self.prices2, self.prices3)
         
     def determine_weights(self):
         price_matrix = []
@@ -40,8 +41,13 @@ class StackerModel:
         plt.plot(self.prices1, color = "green")
         plt.plot(self.prices2, color="orange")
         plt.plot(self.prices3, color = "blue")
-        plt.plot(self.weighted_price(self.prices1,self.prices2, self.prices3), color= "red")
+        plt.plot(self.weighted_prices, color= "red")
         plt.show()
+
+    def get_accuracy(self): 
+        diffs = np.absolute((self.real_prices-  self.weighted_prices.flatten()/self.real_prices))
+        average_error = np.average(diffs) 
+        print(average_error)
        
            
     

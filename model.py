@@ -85,7 +85,6 @@ class Model():
         predicted_price = self.model.predict(x_test)
 
         predicted_price = self.scaler.inverse_transform(predicted_price)
-        print(predicted_price)
         return predicted_price
 
     def guess_prices(self):
