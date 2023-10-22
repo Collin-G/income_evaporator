@@ -34,7 +34,7 @@ class StackerModel:
         return model
 
     def weighted_price(self, p1,p2,p3):
-        predicted_price = self.model.predict(np.concatenate((np.array(p1),np.array(p2),np.array(p3)),axis=1))
+        predicted_price = self.model.predict(np.concatenate((p1,p2,p3),axis=1))
         predicted_price = predicted_price.reshape(-1,1)
         predicted_price = self.scaler.inverse_transform(predicted_price)
         return predicted_price
