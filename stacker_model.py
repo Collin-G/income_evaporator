@@ -9,6 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 class StackerModel:
     def __init__(self, model1, model2, model3):
+        self.look_ahead = model1.look_ahead
         self.prices1 = model1.predicted_prices
         self.prices2 = model2.predicted_prices
         self.prices3 = model3.predicted_prices
@@ -18,7 +19,9 @@ class StackerModel:
         self.model = self.determine_weights()
         self.tmr_price = self.weighted_price(model1.tmr_price,model2.tmr_price,model3.tmr_price)
         self.weighted_prices = self.weighted_price(self.prices1,self.prices2, self.prices3)
-        
+        self.plot_price = np.concatenate([self.weighted_prices[:-20], self.tmr_price])
+        print(self.tmr_price)
+    
     def determine_weights(self):
         price_matrix = []
         price_matrix = np.concatenate((np.array(self.prices1), np.array(self.prices2), np.array(self.prices3)), axis=1)
@@ -41,7 +44,7 @@ class StackerModel:
         plt.plot(self.prices1, color = "green")
         plt.plot(self.prices2, color="orange")
         plt.plot(self.prices3, color = "blue")
-        plt.plot(self.weighted_prices, color= "red")
+        plt.plot(self.plot_price, color= "red")
         plt.show()
 
     def get_accuracy(self): 
