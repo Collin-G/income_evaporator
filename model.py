@@ -63,6 +63,7 @@ class Model():
 
         x_train, y_train = np.array(x_train), np.array(y_train)
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
+        y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1],1))
         return x_train, y_train
 
     def build_model(self):
@@ -143,7 +144,7 @@ class Model():
             if self.look_ahead+x >= len(self.data):
                 break
             x_test.append(self.data[x-self.predict_length:x,0])
-            y_test.append(self.data[x+self.look_ahead,0])
+            y_test.append(self.data[x:x+self.look_ahead,0])
 
         x_test = np.array(x_test)
         x_test = np.reshape(x_test, (x_test.shape[0],x_test.shape[1],1))
