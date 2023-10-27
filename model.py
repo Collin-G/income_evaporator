@@ -15,34 +15,21 @@ import yfinance as yfin
 
 class Model():
 
-    def __init__(self, company, predict_length, look_ahead):
+    def __init__(self, data, scaler, predict_length, longest_predict_length,look_ahead):
         self.raw_data = None
         self.look_ahead = look_ahead
-        self.company = company
-        self.scaler, self.data = self.build_data()
+        self.scaler, self.data = scaler, data
         self.predict_length = predict_length
+        self.longest_predict_length = longest_predict_length
         self.model = self.build_model()
         self.predicted_prices, self.labels = self.guess_prices2()
         self.tmr_price = self.future_projection2() #self.future_projection(50)
 
-        
-    def build_data(self):
-        today = datetime.now()
-
-        start = dt.datetime(2012,1,1)
-        end = today - timedelta(days=100)
-        yfin.pdr_override()
-        data = pdr.get_data_yahoo(self.company, start, end)
-        self.raw_data = pdr.get_data_yahoo(self.company, start, today)
-        scaler = MinMaxScaler(feature_range=(0,1))
-        scaled_data = scaler.fit_transform(data["Close"].values.reshape(-1,1))
-        return scaler,scaled_data
-    
     def train_2(self, predict_length, data, look_ahead):
         x_train = []
         y_train = []
 
-        for i in range(60, len(data)):
+        for i in range(self.longest_predict_length, len(data)):
             if look_ahead+i >= len(data):
                 break
             x_train.append(data[i-predict_length:i,0])
@@ -70,22 +57,22 @@ class Model():
         return model
     
     def future_projection2(self):
-        today = datetime.now() - timedelta(20)
-        start = dt.datetime(2012,1,1)
-        yfin.pdr_override()
-        data = pdr.get_data_yahoo(self.company, start, today)
-        df = data.filter(["Close"])
-        prices = self.test_for_tomorrow(df)
+        # today = datetime.now() - timedelta(20)
+        # start = dt.datetime(2012,1,1)
+        # yfin.pdr_override()
+        # data = pdr.get_data_yahoo(self.company, start, today)
+        # df = data.filter(["Close"])
+        prices = self.test_for_tomorrow(self.data[-20:])
         return prices  
 
-    def test_for_tomorrow(self, df):
+    def test_for_tomorrow(self, data):
         
-        last_x_days = df[-self.predict_length:].values
-        last_x_days_scaled = self.scaler.transform(last_x_days)
-        x_test = []
+        # last_x_days = df[-self.predict_length:].values
+        # last_x_days_scaled = self.scaler.transform(last_x_days)
+        # x_test = []
 
-        x_test.append(last_x_days_scaled)
-        x_test = np.array(x_test)
+        # x_test.append(last_x_days_scaled)
+        # x_test = np.array(x_test)
 
         x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1],1))
         predicted_price = self.model.predict(x_test)
@@ -96,7 +83,7 @@ class Model():
     def guess_prices2(self):
         x_test = []
         y_test = []
-        for x in range(60, len(self.data)):
+        for x in range(self.longest_predict_length, len(self.data)):
             if self.look_ahead+x >= len(self.data):
                 break
             x_test.append(self.data[x-self.predict_length:x,0])
@@ -108,8 +95,8 @@ class Model():
         y_test = np.reshape(y_test, (y_test.shape[0],y_test.shape[1],1))
 
         predicted_prices = self.model.predict(x_test)
-        predicted_prices = self.scaler.inverse_transform(predicted_prices)
-        y_test = self.scaler.inverse_transform(np.squeeze(y_test))
+        # predicted_prices = self.scaler.inverse_transform(predicted_prices)
+        # y_test = self.scaler.inverse_transform(np.squeeze(y_test))
         return predicted_prices, y_test
    
             
