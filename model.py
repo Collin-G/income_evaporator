@@ -25,9 +25,10 @@ class Model():
         self.predicted_prices, self.labels = self.guess_prices2()
         self.tmr_price = self.future_projection2() #self.future_projection(50)
 
-    def train_2(self, predict_length, data, look_ahead):
+    def train_2(self, predict_length, look_ahead):
         x_train = []
         y_train = []
+        data = self.data[:-100]
 
         for i in range(self.longest_predict_length, len(data)):
             if look_ahead+i >= len(data):
@@ -42,12 +43,12 @@ class Model():
 
     def build_model(self):
 
-        x_train, y_train = self.train_2(self.predict_length, self.data, self.look_ahead)
+        x_train, y_train = self.train_2(self.predict_length, self.look_ahead)
         model = Sequential()
-        model.add(LSTM(units=50, return_sequences = True, input_shape=(x_train.shape[1],1)))
+        model.add(LSTM(units=40, return_sequences = True, input_shape=(x_train.shape[1],1)))
         model.add(Dropout(0.2))
-        model.add(LSTM(units=50, return_sequences = False))
-        model.add(Dense(units=50))
+        model.add(LSTM(units=35, return_sequences = False))
+        model.add(Dense(units=20))
         model.add(Dropout(0.2))
         model.add(Dense(units=self.look_ahead))
 
@@ -57,27 +58,16 @@ class Model():
         return model
     
     def future_projection2(self):
-        # today = datetime.now() - timedelta(20)
-        # start = dt.datetime(2012,1,1)
-        # yfin.pdr_override()
-        # data = pdr.get_data_yahoo(self.company, start, today)
-        # df = data.filter(["Close"])
-        prices = self.test_for_tomorrow(self.data[-20:])
+        data = self.data[:-20]
+        prices = self.test_for_tomorrow(data[-self.predict_length:])
         return prices  
 
     def test_for_tomorrow(self, data):
-        
-        # last_x_days = df[-self.predict_length:].values
-        # last_x_days_scaled = self.scaler.transform(last_x_days)
-        # x_test = []
-
-        # x_test.append(last_x_days_scaled)
-        # x_test = np.array(x_test)
-
-        x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1],1))
-        predicted_price = self.model.predict(x_test)
-
-        predicted_price = self.scaler.inverse_transform(predicted_price)
+        x_train = []
+        x_train.append(data)
+        x_train = np.array(x_train)
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
+        predicted_price = self.model.predict(x_train)
         return predicted_price
 
     def guess_prices2(self):
@@ -95,8 +85,6 @@ class Model():
         y_test = np.reshape(y_test, (y_test.shape[0],y_test.shape[1],1))
 
         predicted_prices = self.model.predict(x_test)
-        # predicted_prices = self.scaler.inverse_transform(predicted_prices)
-        # y_test = self.scaler.inverse_transform(np.squeeze(y_test))
         return predicted_prices, y_test
    
             
