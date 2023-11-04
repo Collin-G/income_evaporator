@@ -54,11 +54,12 @@ class Model():
 
         model.compile(optimizer="adam", loss = "mean_squared_error")
         model.fit(x_train, y_train, epochs=1, batch_size=32)
-
+        summary = model.summary()
+        print(summary)
         return model
     
     def future_projection2(self):
-        data = self.data[:-20]
+        data = self.data[:-self.look_ahead]
         prices = self.test_for_tomorrow(data[-self.predict_length:])
         return prices  
 
