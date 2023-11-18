@@ -35,7 +35,7 @@ class StackerModel:
     def determine_weights(self):
         price_matrix = []
        
-        price_matrix = np.stack((np.array(self.prices1), np.array(self.prices2), np.array(self.prices3)),axis=1)
+        price_matrix = np.concatenate((np.array(self.prices1), np.array(self.prices2), np.array(self.prices3)),axis=1)
         x_train, y_train = np.array(price_matrix), np.squeeze(np.array(self.labels))
         model = self.build_model()
         model = model.fit(x_train, y_train)
@@ -44,11 +44,11 @@ class StackerModel:
     def build_model(self):
         # model = RandomForestRegressor(n_estimators=10)
         model = LinearRegression()
-        model.add(Flatten(input_shape=(3,20)))
+        # model.add(Flatten(input_shape=(3,20)))
         return model
 
     def weighted_price(self, p1,p2,p3):
-        input = np.stack((p1,p2,p3),axis=1)
+        input = np.concatenate((p1,p2,p3),axis=1)
         predicted_price = self.model.predict(input)
        
     
