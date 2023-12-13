@@ -61,10 +61,10 @@ class Model():
     # def refine
     def build_functional_model(self):
         x_train = tf.keras.Input(shape=(1, self.predict_length))
-        lstm1 = LSTM(units=40, return_sequences = True, input_shape=(x_train.shape[1],1))
+        lstm1 = LSTM(units=60, return_sequences = True, input_shape=(x_train.shape[1],1))
         drop1 = Dropout(0.2)
         lstm2 = LSTM(units=35, return_sequences = False) 
-        dense1 = Dense(units=20)
+        dense1 = Dense(units=30)
         drop2 = Dropout(0.2)
         dense2 = Dense(units = 1)
 
