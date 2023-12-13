@@ -22,7 +22,7 @@ class Model():
         self.scaler, self.data = scaler, data
         self.predict_length = predict_length
         self.longest_predict_length = longest_predict_length
-        self.model = self.build_functional_model()
+        self.model = self.build_model()
         self.predicted_prices, self.labels = self.guess_prices2()
         self.tmr_price = self.future_projection2() #self.future_projection(50)
 
