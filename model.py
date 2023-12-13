@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd 
 from pandas_datareader import data as pdr
 import datetime as dt
+import tensorflow.keras.backend as K
 from datetime import datetime, timedelta
 
 from sklearn.preprocessing import MinMaxScaler
@@ -21,7 +22,7 @@ class Model():
         self.scaler, self.data = scaler, data
         self.predict_length = predict_length
         self.longest_predict_length = longest_predict_length
-        self.model = self.build_model()
+        self.model = self.build_functional_model()
         self.predicted_prices, self.labels = self.guess_prices2()
         self.tmr_price = self.future_projection2() #self.future_projection(50)
 
@@ -45,7 +46,7 @@ class Model():
 
         x_train, y_train = self.train_2(self.predict_length, self.look_ahead)
         model = Sequential()
-        model.add(LSTM(units=40, return_sequences = True, input_shape=(x_train.shape[1],1)))
+        model.add(LSTM(units=70, return_sequences = True, input_shape=(x_train.shape[1],1)))
         model.add(Dropout(0.2))
         model.add(LSTM(units=35, return_sequences = False))
         model.add(Dense(units=20))
@@ -57,7 +58,40 @@ class Model():
         summary = model.summary()
         print(summary)
         return model
-    
+    # def refine
+    def build_functional_model(self):
+        x_train = tf.keras.Input(shape=(1, self.predict_length))
+        lstm1 = LSTM(units=40, return_sequences = True, input_shape=(x_train.shape[1],1))
+        drop1 = Dropout(0.2)
+        lstm2 = LSTM(units=35, return_sequences = False) 
+        dense1 = Dense(units=20)
+        drop2 = Dropout(0.2)
+        dense2 = Dense(units = 1)
+
+
+        inputs = []
+        inputs = x_train
+        inputs = inputs.eval()
+        for i in range(self.look_ahead):
+            x = lstm1(inputs)
+            x = drop1(x)
+            x = lstm2(x)
+            x = dense1(x)
+            x = drop2(x)
+            out = dense2(x)
+            inputs= inputs.append(out)
+            inputs = np.delete(inputs,0)
+            inputs = K.constant(inputs)
+
+
+        outputs = inputs
+
+        model = tf.keras.Model(inputs = x_train, outputs = outputs, name = "test")
+        X_train, Y_train = self.train_2(self.predict_length, self.look_ahead)
+        model.fit(X_train, Y_train, epochs=1, batch_size=32)
+        return model
+
+
     def future_projection2(self):
         data = self.data[:-self.look_ahead]
         prices = self.test_for_tomorrow(data[-self.predict_length:])

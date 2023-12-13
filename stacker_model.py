@@ -48,10 +48,10 @@ class StackerModel:
 
         model = Sequential([
     
-        Dense(250, input_shape=(3, self.look_ahead)),
+        Dense(250, activation = "relu",input_shape=(3, self.look_ahead)),
         Flatten(),
         Dense(80),
-        Dense(units = 20)
+        Dense(units = self.look_ahead, activation = "relu")
     ])
 
         model.compile(optimizer="adam", loss = "mean_squared_error")
@@ -67,11 +67,11 @@ class StackerModel:
     
         predicted_price = self.scaler.inverse_transform(predicted_price)
         predicted_price = np.cumsum(predicted_price)
-        predicted_price = predicted_price + self.raw_data[-20]
+        predicted_price = predicted_price + self.raw_data[-10]
         return predicted_price
     
     def plot_results(self):
-        plt.plot(np.squeeze(np.array(self.raw_data[-20:])), color = "black")
+        plt.plot(np.squeeze(np.array(self.raw_data[-10:])), color = "black")
         plt.plot(np.squeeze(self.tmr_price), color= "red")
         plt.show()
 
