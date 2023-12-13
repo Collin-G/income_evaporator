@@ -48,10 +48,10 @@ class StackerModel:
 
         model = Sequential([
     
-        Dense(250, activation = "relu",input_shape=(3, self.look_ahead)),
+        Dense(50,input_shape=(3, self.look_ahead)),
         Flatten(),
-        Dense(80),
-        Dense(units = self.look_ahead, activation = "relu")
+        Dense(50),
+        Dense(units = self.look_ahead)
     ])
 
         model.compile(optimizer="adam", loss = "mean_squared_error")
