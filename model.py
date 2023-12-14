@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.layers import Dense, LSTM, Dropout, Reshape, concatenate, Input, Lambda, Flatten, Activation
 import yfinance as yfin
 
 class Model():
@@ -60,33 +60,75 @@ class Model():
         return model
     # def refine
     def build_functional_model(self):
-        x_train = tf.keras.Input(shape=(1, self.predict_length))
-        lstm1 = LSTM(units=60, return_sequences = True, input_shape=(x_train.shape[1],1))
-        drop1 = Dropout(0.2)
-        lstm2 = LSTM(units=35, return_sequences = False) 
-        dense1 = Dense(units=30)
-        drop2 = Dropout(0.2)
-        dense2 = Dense(units = 1)
+        input = tf.keras.Input(shape=(1, self.predict_length))
 
+        lstm1 = LSTM(units=60, return_sequences = True, input_shape=(input.shape[1],1))
+        drop1 = Dropout(0.2)(lstm1)
+        lstm2 = LSTM(units=35, return_sequences = False)(drop1)
+        dense1 = Dense(units=30)(lstm2)
+        drop2 = Dropout(0.2)(dense1)
+        dense2 = Dense(units = 1)(drop2)
 
-        inputs = []
-        inputs = x_train
-        inputs = inputs.eval()
+        # Represents a copy of model:
+        single_day_model = dense2
+
+        #inputs = []
+        #inputs = np.array(input)
+        inputs = input
+        outputs = [single_day_model(input)]
+        #inputs = inputs.eval()
         for i in range(self.look_ahead):
-            x = lstm1(inputs)
-            x = drop1(x)
-            x = lstm2(x)
-            x = dense1(x)
-            x = drop2(x)
-            out = dense2(x)
-            inputs= inputs.append(out)
-            inputs = np.delete(inputs,0)
-            inputs = K.constant(inputs)
+            cur_layer = concatenate(inputs[i:], outputs)
+            #cur_layer = concatenate(outputs[i-1], )
+            #inputs= inputs.append(out)
+            #inputs = np.delete(inputs,0)
+            #inputs = K.constant(inputs)
 
 
         outputs = inputs
 
-        model = tf.keras.Model(inputs = x_train, outputs = outputs, name = "test")
+        model = tf.keras.Model(inputs = input, outputs = outputs, name = "test")
+        X_train, Y_train = self.train_2(self.predict_length, self.look_ahead)
+        model.fit(X_train, Y_train, epochs=1, batch_size=32)
+        return model
+    
+    def build_functional_long_long_model(self):
+        input = tf.keras.Input(shape=(self.predict_length, 1))
+
+        class SingleDayModelInstance(keras.layers.Layer):
+            def __init__(self):
+                self.lstm1 = LSTM(units=60, return_sequences = True, input_shape=(input.shape))
+                self.lstm2 = LSTM(units=35, return_sequences = False)
+                self.dense1 = Dense(units=30)
+                self.drop2 = Dropout(0.2)
+                self.dense2 = Dense(units = 1)
+                self.reshape1 = Reshape((1, 1))
+                super().__init__()
+                
+            def call(self, input):
+                x = self.lstm1(input)
+                x = self.lstm2(x)
+                x = self.dense1(x)
+                x = self.drop2(x)
+                x = self.dense2(x)
+                x = self.reshape1(x)
+
+                return x
+
+        # Represents a copy of model:
+        single_day_model = SingleDayModelInstance()
+        outputs_raw = single_day_model(input)
+
+        for i in range(1, self.look_ahead):
+            concatted = concatenate([input, outputs_raw], axis=1)
+            cur_input = concatted[i:i+self.predict_length]
+            outputs_raw = concatenate([outputs_raw, single_day_model(cur_input)], axis=1)
+
+        # Reshape outputs
+        outputs = Reshape((-1,))(outputs_raw)
+
+        model = tf.keras.Model(inputs = input, outputs = outputs, name = "test")
+
         X_train, Y_train = self.train_2(self.predict_length, self.look_ahead)
         model.fit(X_train, Y_train, epochs=1, batch_size=32)
         return model
