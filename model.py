@@ -22,7 +22,7 @@ class Model():
         self.scaler, self.data = scaler, data
         self.predict_length = predict_length
         self.longest_predict_length = longest_predict_length
-        self.model = self.build_model()
+        self.model = self.build_functional_long_long_model()
         self.predicted_prices, self.labels = self.guess_prices2()
         self.tmr_price = self.future_projection2() #self.future_projection(50)
 
@@ -121,7 +121,7 @@ class Model():
 
         for i in range(1, self.look_ahead):
             concatted = concatenate([input, outputs_raw], axis=1)
-            cur_input = concatted[i:i+self.predict_length]
+            cur_input = concatted[:, i:i+self.predict_length]
             outputs_raw = concatenate([outputs_raw, single_day_model(cur_input)], axis=1)
 
         # Reshape outputs
