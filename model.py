@@ -133,7 +133,6 @@ class Model():
         model.fit(X_train, Y_train, epochs=1, batch_size=32)
         return model
 
-
     def future_projection2(self):
         data = self.data[:-self.look_ahead]
         prices = self.test_for_tomorrow(data[-self.predict_length:])
